@@ -9,6 +9,8 @@ def set_model(model, device) :
         u_model = u_Net_shallow_wide_resnet().to(device)
     elif model == 'deep_narrow' :
         u_model = u_Net_deep_narrow().to(device)
+    elif model == 'deep_narrow_1D' :
+        u_model = u_Net_deep_narrow_1D().to(device)
     elif model == 'shallow_wide' :
         u_model = u_Net_shallow_wide().to(device)
     return u_model
@@ -51,7 +53,8 @@ class u_Net_shallow_wide_resnet(nn.Module):
 class u_Net_deep_narrow(nn.Module):
     def __init__(self):
         super(u_Net_deep_narrow, self).__init__()
-        self.fc1 = nn.Linear(2, 64)
+        self.fc1 = nn.Linear(2, 64)    #CHANGED TO SOLVE 1-D PROBLEMS
+        #self.fc1 = nn.Linear(1, 64)
         self.fc2 = nn.Linear(64, 64)    
         self.fc3 = nn.Linear(64, 64)    
         self.fc4 = nn.Linear(64, 64)  
@@ -97,3 +100,20 @@ class u_Net_deep_narrow_resnet(nn.Module):
         x = self.act1(self.fc8(x))+x
         x = self.fc9(x)
         return x
+    
+class u_Net_deep_narrow_1D(nn.Module):
+    """This is meant to solve 1-D problems"""
+    def __init__(self):
+        super(u_Net_deep_narrow_1D, self).__init__()
+        self.fc1 = nn.Linear(1, 5)
+        self.fc2 = nn.Linear(5, 5)
+        self.fc3 = nn.Linear(5, 1)
+        self.act1 = nn.Tanh()
+    def forward(self, x):
+        y = self.act1(self.fc1(x))
+        y = self.act1(self.fc2(y))
+        y = self.fc3(y)
+        print("x0:", x[0], "x1:", x[-1])
+        #output = (1 - torch.exp(-(x - x[0])))*(1 - torch.exp(-(x[-1] - x))) * y 
+        return y
+    
